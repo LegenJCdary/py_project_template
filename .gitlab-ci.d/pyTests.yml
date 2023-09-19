@@ -1,0 +1,12 @@
+---
+pytest:
+  stage: pyTesting
+  script:
+    - pip install .
+    - pytest
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: always
+  tags:
+    - pytest_tag

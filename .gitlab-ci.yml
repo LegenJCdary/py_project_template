@@ -1,0 +1,14 @@
+---
+stages:
+  - lintTesting
+  - pyTesting
+
+before_script:
+  - python3.9 -m venv ci_venv
+  - source ./ci_venv/bin/activate
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
+
+include:
+  - .gitlab-ci.d/lintTests.yml
+  - .gitlab-ci.d/pyTests.yml

@@ -1,0 +1,47 @@
+---
+aspell:
+  stage: lintTesting
+  script:
+    - while IFS= read -r word; do echo -e "*${word}\n#" | aspell -a >& /dev/null; done < ./tests/configs/aspell_exceptions
+    - mistakes=$(while IFS= read -r file; do aspell --ignore-case list < "${file}"; done < <(git ls-files "*") | sort | uniq -c | sort -nr)
+    - if [ -n "$mistakes" ]; then echo "$mistakes"; exit 1; fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: always
+  tags:
+    - lint_tag
+
+pylint_dev:
+  stage: lintTesting
+  script: pylint --rcfile=./tests/configs/pylint_dev.toml $(git ls-files "*.py")
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: always
+  tags:
+    - lint_tag
+
+pylint_stable:
+  stage: lintTesting
+  script: pylint --rcfile=./tests/configs/pylint_stable.toml $(git ls-files "*.py")
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != "stable"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: always
+  tags:
+    - lint_tag
+
+yamllint:
+  stage: lintTesting
+  script: yamllint -s -c ./tests/configs/yamllint.yml $(git ls-files "*.yml" "*.yaml")
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: always
+  tags:
+    - lint_tag
