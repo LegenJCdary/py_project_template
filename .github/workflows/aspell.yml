@@ -1,0 +1,23 @@
+---
+name: Aspell
+
+on:
+  pull_request:
+    branches:
+      - main
+      - stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo apt install -y aspell aspell-en
+      - name: Check spelling in files with aspell
+        run: |
+          while IFS= read -r word; do echo -e "*${word}\n#" | aspell -a >& /dev/null; done < ./tests/configs/aspell_exceptions
+          mistakes=$(while IFS= read -r file; do aspell --ignore-case list < "${file}"; done < <(git ls-files "*") | sort | uniq -c | \
+                                                                                                                 sort -nr)
+          if [ -n "$mistakes" ]; then echo "$mistakes"; exit 1; fi

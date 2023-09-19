@@ -1,0 +1,27 @@
+---
+name: Pylint
+
+on:
+  pull_request:
+    branches:
+      - stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9.13"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Analyse code with pylint
+        run: |
+          pylint --rcfile=./tests/configs/pylint_stable.toml $(git ls-files '*.py')
