@@ -22,6 +22,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install .
       - name: Analyse code with pylint
         run: |
           pylint --rcfile=./tests/configs/pylint_dev.toml $(git ls-files '*.py')
